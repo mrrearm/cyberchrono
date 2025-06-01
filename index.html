@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Cyber Chronometer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+  /* Reset minimi */
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background: radial-gradient(circle at center, #0f0c29, #302b63, #24243e);
+    color: #00fff7;
+    font-family: 'Orbitron', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+    margin: 0;
+    padding: 30px 15px;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+    text-align: center;
+    text-shadow:
+      0 0 5px #00fff7,
+      0 0 10px #00fff7,
+      0 0 20px #0ff,
+      0 0 40px #0ff,
+      0 0 80px #0ff;
+  }
+
+  #chronometer {
+    font-size: 3.5rem;
+    background: #001f27;
+    padding: 15px 40px;
+    border-radius: 12px;
+    box-shadow:
+      0 0 15px #00fff7,
+      inset 0 0 10px #00fff7;
+    letter-spacing: 0.15em;
+    user-select: none;
+    margin-bottom: 30px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    word-break: break-word;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  button {
+    flex: 1 1 45%;
+    min-width: 120px;
+    background: linear-gradient(145deg, #00f0ff 0%, #00c3ff 100%);
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #001f27;
+    cursor: pointer;
+    box-shadow:
+      0 0 10px #00fff7,
+      0 0 20px #00fff7 inset;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    user-select: none;
+  }
+
+  button:hover {
+    background: linear-gradient(145deg, #00c3ff 0%, #00f0ff 100%);
+    box-shadow:
+      0 0 30px #00fff7,
+      0 0 50px #00fff7 inset;
+    color: #000;
+  }
+
+  button:active {
+    transform: scale(0.95);
+  }
+
+  /* Media queries per schermi piccoli */
+  @media (max-width: 400px) {
+    h1 {
+      font-size: 2rem;
+      letter-spacing: 0.15em;
+      margin-bottom: 25px;
+    }
+
+    #chronometer {
+      font-size: 2.5rem;
+      padding: 12px 25px;
+      max-width: 100%;
+      letter-spacing: 0.1em;
+    }
+
+    button {
+      font-size: 1rem;
+      min-width: 100px;
+      flex: 1 1 100%;
+      margin-bottom: 10px;
+    }
+
+    .buttons {
+      gap: 10px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>Cyber Chronometer</h1>
+
+<div id="chronometer">00:00:00.000</div>
+
+<div class="buttons">
+  <button id="startBtn">Avvia</button>
+  <button id="pauseBtn">Pausa</button>
+  <button id="stopBtn">Stop</button>
+</div>
+
+<script>
+  const chronometer = document.getElementById('chronometer');
+  const startBtn = document.getElementById('startBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  
+  let startTime = 0;
+  let elapsedTime = 0;
+  let timerInterval;
+  let isRunning = false;
+
+  function timeToString(time) {
+    let diffInHrs = time / 3600000;
+    let hh = Math.floor(diffInHrs);
+
+    let diffInMin = (diffInHrs - hh) * 60;
+    let mm = Math.floor(diffInMin);
+
+    let diffInSec = (diffInMin - mm) * 60;
+    let ss = Math.floor(diffInSec);
+
+    let diffInMs = (diffInSec - ss) * 1000;
+    let ms = Math.floor(diffInMs);
+
+    let formattedHH = hh.toString().padStart(2, "0");
+    let formattedMM = mm.toString().padStart(2, "0");
+    let formattedSS = ss.toString().padStart(2, "0");
+    let formattedMS = ms.toString().padStart(3, "0");
+
+    return `${formattedHH}:${formattedMM}:${formattedSS}.${formattedMS}`;
+  }
+
+  function print(txt) {
+    chronometer.innerHTML = txt;
+  }
+
+  function start() {
+    if (isRunning) return;
+    isRunning = true;
+    startTime = Date.now() - elapsedTime;
+    timerInterval = setInterval(function printTime() {
+      elapsedTime = Date.now() - startTime;
+      print(timeToString(elapsedTime));
+    }, 10);
+  }
+
+  function pause() {
+    if (!isRunning) return;
+    clearInterval(timerInterval);
+    isRunning = false;
+  }
+
+  function stop() {
+    clearInterval(timerInterval);
+    isRunning = false;
+    elapsedTime = 0;
+    print("00:00:00.000");
+  }
+
+  function reset() {
+    elapsedTime = 0;
+    if (!isRunning) {
+      print("00:00:00.000");
+    } else {
+      startTime = Date.now();
+    }
+  }
+
+  startBtn.addEventListener('click', start);
+  pauseBtn.addEventListener('click', pause);
+  stopBtn.addEventListener('click', stop);
+  resetBtn.addEventListener('click', reset);
+</script>
+
+</body>
+</html>
